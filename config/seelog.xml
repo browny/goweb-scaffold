@@ -1,0 +1,16 @@
+<seelog type="sync" minlevel="debug" maxlevel="error">
+	<outputs formatid="main">
+		<console/>
+
+		<!-- <splitter formatid="main"> -->
+		<!-- 	<file path="./log/middleware.log"/> -->
+		<!-- </splitter> -->
+
+		<!-- <file formatid="main" path="/var/log/messages"/> -->
+
+		<rollingfile formatid="main" type="date" filename="/var/log/middle.log" datepattern="02.01.2006"  maxrolls="5" />
+
+	</outputs>
+	<formats>
+		<format id="main" format="%Date(2006-01-02 15:04:05.000) [%Level] %Msg (%File, %FuncShort)%n"/> </formats>
+</seelog>

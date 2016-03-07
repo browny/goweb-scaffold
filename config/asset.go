@@ -1,0 +1,223 @@
+package config
+
+import (
+	"bytes"
+	"compress/gzip"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"path"
+	"sync"
+	"time"
+)
+
+type _esc_localFS struct{}
+
+var _esc_local _esc_localFS
+
+type _esc_staticFS struct{}
+
+var _esc_static _esc_staticFS
+
+type _esc_file struct {
+	compressed string
+	size       int64
+	local      string
+	isDir      bool
+
+	data []byte
+	once sync.Once
+	name string
+}
+
+func (_esc_localFS) Open(name string) (http.File, error) {
+	f, present := _esc_data[path.Clean(name)]
+	if !present {
+		return nil, os.ErrNotExist
+	}
+	return os.Open(f.local)
+}
+
+func (_esc_staticFS) prepare(name string) (*_esc_file, error) {
+	f, present := _esc_data[path.Clean(name)]
+	if !present {
+		return nil, os.ErrNotExist
+	}
+	var err error
+	f.once.Do(func() {
+		f.name = path.Base(name)
+		if f.size == 0 {
+			return
+		}
+		var gr *gzip.Reader
+		gr, err = gzip.NewReader(bytes.NewBufferString(f.compressed))
+		if err != nil {
+			return
+		}
+		f.data, err = ioutil.ReadAll(gr)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return f, nil
+}
+
+func (fs _esc_staticFS) Open(name string) (http.File, error) {
+	f, err := fs.prepare(name)
+	if err != nil {
+		return nil, err
+	}
+	return f.File()
+}
+
+func (f *_esc_file) File() (http.File, error) {
+	type httpFile struct {
+		*bytes.Reader
+		*_esc_file
+	}
+	return &httpFile{
+		Reader:    bytes.NewReader(f.data),
+		_esc_file: f,
+	}, nil
+}
+
+func (f *_esc_file) Close() error {
+	return nil
+}
+
+func (f *_esc_file) Readdir(count int) ([]os.FileInfo, error) {
+	return nil, nil
+}
+
+func (f *_esc_file) Stat() (os.FileInfo, error) {
+	return f, nil
+}
+
+func (f *_esc_file) Name() string {
+	return f.name
+}
+
+func (f *_esc_file) Size() int64 {
+	return f.size
+}
+
+func (f *_esc_file) Mode() os.FileMode {
+	return 0
+}
+
+func (f *_esc_file) ModTime() time.Time {
+	return time.Time{}
+}
+
+func (f *_esc_file) IsDir() bool {
+	return f.isDir
+}
+
+func (f *_esc_file) Sys() interface{} {
+	return f
+}
+
+// FS returns a http.Filesystem for the embedded assets. If useLocal is true,
+// the filesystem's contents are instead used.
+func FS(useLocal bool) http.FileSystem {
+	if useLocal {
+		return _esc_local
+	}
+	return _esc_static
+}
+
+// FSByte returns the named file from the embedded assets. If useLocal is
+// true, the filesystem's contents are instead used.
+func FSByte(useLocal bool, name string) ([]byte, error) {
+	if useLocal {
+		f, err := _esc_local.Open(name)
+		if err != nil {
+			return nil, err
+		}
+		return ioutil.ReadAll(f)
+	}
+	f, err := _esc_static.prepare(name)
+	if err != nil {
+		return nil, err
+	}
+	return f.data, nil
+}
+
+// FSMustByte is the same as FSByte, but panics if name is not present.
+func FSMustByte(useLocal bool, name string) []byte {
+	b, err := FSByte(useLocal, name)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+// FSString is the string version of FSByte.
+func FSString(useLocal bool, name string) (string, error) {
+	b, err := FSByte(useLocal, name)
+	return string(b), err
+}
+
+// FSMustString is the string version of FSMustByte.
+func FSMustString(useLocal bool, name string) string {
+	return string(FSMustByte(useLocal, name))
+}
+
+var _esc_data = map[string]*_esc_file{
+
+	"/config/.DS_Store": {
+		local: "config/.DS_Store",
+		size:  6148,
+		compressed: "" +
+			"\x1f\x8b\b\x00\x00\tn\x88\x00\xff\xec\x97\xcdJ\xc3@\x14\x85ύ\x11\xa6\x16$K\x97\xb3t%\xf8\x06\xa1T\xc1\xb5{\u007fZ\xa3(\xd1,Tp\x99\a\xf4\x01|\x00\xdfC\xefd\x8e\x92N\xe3\xc2UK{\xbf2|m:g~H\xc8\xcc\x00\x90\xc9\xeb\xcd1P\xe8W\x87\xe8l\x84A\x1c\xcb\x12\x19\xbd\x1b\xda\xeb\xdax\xc1\x11\xee\xd0" +
+			"\x9c\xd5\xcd|\xb8-c\xcd\b\xf7\xce\xe1\x1a\xcf\xfa\xa9\xfa\xf7oV73\xc4\a\xe3T\xcb\xe1WG\x97\x19a\x8e\x06O\xb8Ž\xd6\x1eHd\x17Ib\x9c$\x1e\xb47\xfd\x9d\xa4>\x93\xd4\xfeB\xeaRGWinp\x8c\xf2\x91d\xf7\xba\xf9T\xa8\xb5\x85\xd0\xe3\x1b\x1eQ'\xf3zל\xebe\f\xc30\xb6\x05\x89r\xe3\xd5\x0e\xc3" +
+			"0\x8c5$\xbc\x1f<]\xd2m\xb4\xf0\xff\x8c\xce{\x99\x82\xf6tI\xb7\xd1\xc2z\x19\x9dӎ.hO\x97t\x1b͗\x96\xf0\xf0!\xecYxB\x91\x82\xf6t\xf9\xcfI\x1bƖ\xb0\x13U\x84\xf5\xff\xe4\xef\xf3\xbfa\x18\x1b\x8c\xe4\xd3\xf3\xe9\x04\xbf\a\x82%\xc2Z\xeb\xb5\\\xfd\x04\xb0\xb8\x11\u0d5cu\xc3R|л\xee\xe9\x92" +
+			"n\xa3m#`\x18\xab\xe2;\x00\x00\xff\xff\xfcץ\xfa\x04\x18\x00\x00",
+	},
+
+	"/config/config.go": {
+		local: "config/config.go",
+		size:  742,
+		compressed: "" +
+			"\x1f\x8b\b\x00\x00\tn\x88\x00\xffdR\xcdj\xdb@\x10>k\x9fb\xaaC\x91 HwC\x0e\xa5%\xa1PZC\x1f Y\xed\x8e\xe4u\xa5\x1d\xb1\x1a\x11B\xf0\xbbwf\xe5\xe0\x88\x9c,\xbe\xfd~f\xbeq\xdb\xc2Ѻ\u007fv@p\x14\xfb0\x80'\\\xae\xdfk\xb2\x1c(\xc2d\xa3\x10&\x8cl\xe6\x1d٘0͔\x18*S" +
+			"\x94\x18\x1d\xf9\x10\x87\xf6\xbcP,\x05\xe8'֟\x88ܞ\x98\xe7\xd2\xd4\xc6H\xde\xe3H\x9d\x1d\xbfoia\x01>!t!\xaa\x14\xa8;\xa3c\xa0\xfe}\x1a\xf5\x82>\x8ch\xf8uƽv\xe1\xb4\n\xf9\xcd\x14\xc7D\xaa\xfb\xe9\x15S\x9fg\xd5\x1d\xcayß\x82/\x9f\xcd%\xa7\xff\"\xeb\x1f\xddH\xab\xbf\xba\x8c\x02\xbc/\xdc\xe4" +
+			"8\xa6]\x8e\xe9\xd7\xe8>\xe9*\x1d\nt\xaf\xe6A\xbe\xea\xfdh2\x93G\xa9\x03\x13\x1c\xee\xf3\x12\xcdo|\xf9\xb1AYZ\x9bb_\xb2\xf0>Z\xbc]L\x81)˯N\xcd&\xaf\xbe\xeet\xe2\x13zP\xe6\x97{\x88a\xd4\xe8B\x9ao\x8eR\x04\x8f\xb1*\xe5\x8dҡ\xbcS\x92\xb0\xa5\x86\"!\xaf)\xee\xaf\xfc\xa1\x9fo\xcb" +
+			"\x82\xac\xa7yIv\x9ee\am \x0f)\xd5$\xb4>_\x04\xfaD\x13\xd8\xccu\x822z\xe8^\xd5C[9\xb4\xed@\x9e\\Cih\x87\xc0\xa7\xb5k\x1cM\xedt\x0e\x9d\xd4\xd1\xe2\xe2n\xc5\xe6\xc0j\xb6|\xba\x1e\xb0\xbe5\xab\vm!R\xc5\xc3ߪ\xb7\xe3\xa2\xed\xe9\bw\xf0\xa4h~n\xfe\xcc\x18\xb3G}\xdb0\xffs" +
+			".\xe6\u007f\x00\x00\x00\xff\xff\x1b\xdc\xea\xfe\xe6\x02\x00\x00",
+	},
+
+	"/config/config.json": {
+		local: "config/config.json",
+		size:  36,
+		compressed: "" +
+			"\x1f\x8b\b\x00\x00\tn\x88\x00\xff\xaa\xe6\xe2T*(\xca\xcfJM.\x89\xcfLQ\xb2RP\xca\xc9,K\xcd\xc8/-N\xd5-I-.Q\xe2\xaa\xe5\x02\x04\x00\x00\xff\xff\x88\x12Y\xa4$\x00\x00\x00",
+	},
+
+	"/config/config_test.go": {
+		local: "config/config_test.go",
+		size:  237,
+		compressed: "" +
+			"\x1f\x8b\b\x00\x00\tn\x88\x00\xffd\x8f\xcdJ\xc50\x10Fם\xa7\x18\xb2J\xe4\x9a\xec\x05\x17\"\"\x82\v\x17\xf7\x05b\x9a\xa6\xa9m\xa6&\x13A\xc4w7\xfdٹ\x1a8\x1c\xbeì\xd6}\xd8\xe0\xd1Q\x1ab\x00\x88\xcbJ\x99QB'B䱾kG\x8b)\x9c=\xbb1\x1b\xf6\x85\xe3\xf0ml)>\xb3h\xd6NR\x10" +
+			"\xa0\x00\x86\x9a\x1c^\x1bx%\xdb?\xbb\x99j\xff\xb8\xefJƛS\xd4W\x85?\xd0\x1d=\xbc\xbb\xc7\u007f\xee\x06\x1e\xda>Ka\x0e\xed<z*\x94\x84j\xa1\xee\xe8\xeb\xa7\xcfjg\xc9\x17\x14s\xfc\xf2#\xd5\xe2o\xb7\x8e\xb8\x9c\x0f\xe9\xb7L\x93w\xfc\xd2+\xf8\x85\xbf\x00\x00\x00\xff\xffp\xe1\xf3\xd3\xed\x00\x00\x00",
+	},
+
+	"/config/seelog.xml": {
+		local: "config/seelog.xml",
+		size:  526,
+		compressed: "" +
+			"\x1f\x8b\b\x00\x00\tn\x88\x00\xfflRMo\xea0\x10<ïطR$\x90^b\x83\x1e\xef\x80\xec\x9c*N\xed\xa9Ǫ\a\x97,\xc1\x92cG\xb6C˿\xaf\x9d\x00\xfd\xbce'\xb33\xb3\x93\x88@d\\\v\xf1ܓ\xc4p\xb6{\x84N[C'2\x12\x1bz\x19\xda\x04\xa8\xb7\v@\xde;\x8f\xf5|&\xdc\x10\xfb!\x06" +
+			"88ߩ\xa8\x1b\x89\x9d\xd26\xbf\x9a\x89\xbd\xb3\xc1\x19b\xf5<O\u007f\xca\x12D荎\x91\xfc\x0f>\x94e}e\xcd\xc4A\x1b\x82^ţĊ\xa5\\\xac\xd3Mc\xe8Uy\xaa҈\xec\v_\xb0\xab\xec\x04\xdf\xf0Q\xe6\x9b\xd3E\x96\x9d\x94\x9f\x94)\x04\xd5R\xb8j\xe6e\xef\x8cѶ\xfdu}j\xa8Q\x91\x102\xc1\xaa" +
+			"\x8e>ˍAǐ\x90I\xc9-\xe5\xb2\x12\xf9\xba\xe2\xabj\xcd\xf9\u007f\x84\xdcd\xf6\b\x127\bc?\x82]\x9ḁN\x9ea<pz\x86\x8f\x00\x13 \xb1\xb8K\xf2\x8b,X\xf2U\xc9װ\xdal\xf9\xbf-\xdfT\x9c\xf3%<\x15\xf7\xf9[=C\xf1\x10ZX\x14\xbb\x94\xf5/\x14\xbb\xc1\xee\x1f\x8f\xce\xc7ea\xf3ɂ\xdd" +
+			"\xccR\x8d\xe3OP\xcf\xdf\x03\x00\x00\xff\xff5w\xe5\x05\x0e\x02\x00\x00",
+	},
+
+	"/": {
+		isDir: true,
+		local: "/",
+	},
+
+	"/config": {
+		isDir: true,
+		local: "/config",
+	},
+}
