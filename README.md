@@ -26,6 +26,12 @@ This is a scaffold project for go web application with some convenient component
   go run main.go
   ```
 
+1. Run test
+
+  ``` sh
+  cd ./goweb-scaffold
+  sh script/test.sh
+  ```
 
 ### Docker Dev
 
