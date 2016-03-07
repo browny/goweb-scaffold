@@ -8,6 +8,24 @@ This is a scaffold project for go web application with some convenient component
 - HTTP middleware with [negroni](https://github.com/codegangsta/negroni)
 - Testing with [testify](https://github.com/stretchr/testify)
 
+### Local Dev
+
+1. Assume your environment with golang installed (For Mac: `brew install go`)
+1. Install depedencies
+
+  ``` sh
+  go get github.com/tools/godep
+  go get github.com/stretchr/testify
+  ```
+
+1. Run http server
+
+  ``` sh
+  git clone git@github.com:browny/goweb-scaffold.git
+  cd ./goweb-scaffold
+  go run main.go
+  ```
+
 
 ### Docker Dev
 
