@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -23,6 +24,11 @@ func main() {
 	var port string
 	flag.StringVar(&port, "port", "8000", "port")
 	flag.Parse()
+
+	// set logger
+	seelogConf, _ := ioutil.ReadAll(config.LoadAsset("/config/seelog.xml"))
+	logger, _ := log.LoggerFromConfigAsBytes(seelogConf)
+	log.ReplaceLogger(logger)
 
 	// config loading
 	globalConfig = config.LoadGcloudConfig(
