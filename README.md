@@ -90,3 +90,16 @@ This is a scaffold project for go web application with some convenient component
   go run main.go
   ```
 
+### Change the package name
+
+- Linux
+
+	``` sh 
+	grep -rl  --exclude-dir=".git" goweb-scaffold . | xargs sed -i 's/goweb-scaffold/your-name/g'
+	```
+
+- Mac
+
+	``` sh 
+	grep -rl  --exclude-dir=".git" goweb-scaffold . | xargs sed -i '' -e 's/goweb-scaffold/your-name/g'
+	```
