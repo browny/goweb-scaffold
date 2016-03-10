@@ -90,16 +90,23 @@ This is a scaffold project for go web application with some convenient component
   go run main.go
   ```
 
-### Change the package name
+### Start project from this scaffold
 
-- Linux
+1. Change the package name
+  - Linux
+  
+  	``` sh 
+  	grep -rl  --exclude-dir=".git" goweb-scaffold . | xargs sed -i 's/goweb-scaffold/your-name/g'
+  	```
+  
+  - Mac
+  
+  	``` sh 
+  	grep -rl  --exclude-dir=".git" goweb-scaffold . | xargs sed -i '' -e 's/goweb-scaffold/your-name/g'
+  	```
 
-	``` sh 
-	grep -rl  --exclude-dir=".git" goweb-scaffold . | xargs sed -i 's/goweb-scaffold/your-name/g'
-	```
+2. Reset the git upstream url
 
-- Mac
-
-	``` sh 
-	grep -rl  --exclude-dir=".git" goweb-scaffold . | xargs sed -i '' -e 's/goweb-scaffold/your-name/g'
+	``` sh
+	git remote set-url origin <your project git repository url>
 	```
