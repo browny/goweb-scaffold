@@ -6,7 +6,6 @@
 goweb-scaffold is a template project for go web application with some convenient components as below.
 
 - Dependency injection with [facebookgo-inject](github.com/facebookgo/inject)
-- Portable dependencies with [godep](https://github.com/tools/godep)
 - Logging with [seelog](github.com/cihub/seelog)
 - HTTP middleware with [negroni](https://github.com/codegangsta/negroni)
 - Testing with [testify](https://github.com/stretchr/testify)
