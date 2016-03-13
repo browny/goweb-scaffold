@@ -1,5 +1,7 @@
 ## goweb-scaffold
 [![GoDoc](https://godoc.org/github.com/browny/goweb-scaffold?status.svg)](http://godoc.org/github.com/browny/goweb-scaffold)
+[![Travis Build Status](https://travis-ci.org/browny/goweb-scaffold.svg?branch=master)](https://travis-ci.org/browny/goweb-scaffold)
+
 
 This is a scaffold project for go web application with some convenient components as below.
 
