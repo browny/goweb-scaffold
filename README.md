@@ -3,7 +3,7 @@
 [![Travis Build Status](https://travis-ci.org/browny/goweb-scaffold.svg?branch=master)](https://travis-ci.org/browny/goweb-scaffold)
 
 
-This is a scaffold project for go web application with some convenient components as below.
+goweb-scaffold is a template project for go web application with some convenient components as below.
 
 - Dependency injection with [facebookgo-inject](github.com/facebookgo/inject)
 - Portable dependencies with [godep](https://github.com/tools/godep)
@@ -17,8 +17,7 @@ This is a scaffold project for go web application with some convenient component
 1. Install depedencies
 
   ``` sh
-  go get github.com/tools/godep
-  go get github.com/stretchr/testify
+  make deps
   ```
 
 1. Run http server
@@ -75,12 +74,11 @@ This is a scaffold project for go web application with some convenient component
   docker run --rm -it -v `pwd`:/go/src/goweb-scaffold -p 8000:8000 browny/go-docker-dev
   ```
 
-1. Inside the container, cd into `/go/src/goweb-scaffold`, then install dependencies ( **this takes about 3min**; if you don't want to do this every time; use `docker commit` to save your changes )
+1. Inside the container, cd into `/go/src/goweb-scaffold`, then install dependencies (few minutes)
 
   ``` sh
   cd /go/src/goweb-scaffold;
-  go get github.com/stretchr/testify;
-  godep restore goweb-scaffold
+  make deps
   ```
 
 1. Here your go
