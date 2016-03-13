@@ -7,12 +7,13 @@ import (
 	"net/http"
 	"os"
 
-	log "github.com/cihub/seelog"
-	"github.com/codegangsta/negroni"
-	"github.com/facebookgo/inject"
 	"goweb-scaffold/config"
 	"goweb-scaffold/cron"
 	"goweb-scaffold/rest"
+
+	log "github.com/cihub/seelog"
+	"github.com/codegangsta/negroni"
+	"github.com/facebookgo/inject"
 )
 
 var taskRunner cron.TaskRunner
