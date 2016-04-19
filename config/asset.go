@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/base64"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -11,35 +12,41 @@ import (
 	"time"
 )
 
-type _esc_localFS struct{}
+type _escLocalFS struct{}
 
-var _esc_local _esc_localFS
+var _escLocal _escLocalFS
 
-type _esc_staticFS struct{}
+type _escStaticFS struct{}
 
-var _esc_static _esc_staticFS
+var _escStatic _escStaticFS
 
-type _esc_file struct {
-	compressed string
-	size       int64
-	local      string
-	isDir      bool
-
-	data []byte
-	once sync.Once
+type _escDirectory struct {
+	fs   http.FileSystem
 	name string
 }
 
-func (_esc_localFS) Open(name string) (http.File, error) {
-	f, present := _esc_data[path.Clean(name)]
+type _escFile struct {
+	compressed string
+	size       int64
+	modtime    int64
+	local      string
+	isDir      bool
+
+	once sync.Once
+	data []byte
+	name string
+}
+
+func (_escLocalFS) Open(name string) (http.File, error) {
+	f, present := _escData[path.Clean(name)]
 	if !present {
 		return nil, os.ErrNotExist
 	}
 	return os.Open(f.local)
 }
 
-func (_esc_staticFS) prepare(name string) (*_esc_file, error) {
-	f, present := _esc_data[path.Clean(name)]
+func (_escStaticFS) prepare(name string) (*_escFile, error) {
+	f, present := _escData[path.Clean(name)]
 	if !present {
 		return nil, os.ErrNotExist
 	}
@@ -50,7 +57,8 @@ func (_esc_staticFS) prepare(name string) (*_esc_file, error) {
 			return
 		}
 		var gr *gzip.Reader
-		gr, err = gzip.NewReader(bytes.NewBufferString(f.compressed))
+		b64 := base64.NewDecoder(base64.StdEncoding, bytes.NewBufferString(f.compressed))
+		gr, err = gzip.NewReader(b64)
 		if err != nil {
 			return
 		}
@@ -62,7 +70,7 @@ func (_esc_staticFS) prepare(name string) (*_esc_file, error) {
 	return f, nil
 }
 
-func (fs _esc_staticFS) Open(name string) (http.File, error) {
+func (fs _escStaticFS) Open(name string) (http.File, error) {
 	f, err := fs.prepare(name)
 	if err != nil {
 		return nil, err
@@ -70,50 +78,54 @@ func (fs _esc_staticFS) Open(name string) (http.File, error) {
 	return f.File()
 }
 
-func (f *_esc_file) File() (http.File, error) {
+func (dir _escDirectory) Open(name string) (http.File, error) {
+	return dir.fs.Open(dir.name + name)
+}
+
+func (f *_escFile) File() (http.File, error) {
 	type httpFile struct {
 		*bytes.Reader
-		*_esc_file
+		*_escFile
 	}
 	return &httpFile{
-		Reader:    bytes.NewReader(f.data),
-		_esc_file: f,
+		Reader:   bytes.NewReader(f.data),
+		_escFile: f,
 	}, nil
 }
 
-func (f *_esc_file) Close() error {
+func (f *_escFile) Close() error {
 	return nil
 }
 
-func (f *_esc_file) Readdir(count int) ([]os.FileInfo, error) {
+func (f *_escFile) Readdir(count int) ([]os.FileInfo, error) {
 	return nil, nil
 }
 
-func (f *_esc_file) Stat() (os.FileInfo, error) {
+func (f *_escFile) Stat() (os.FileInfo, error) {
 	return f, nil
 }
 
-func (f *_esc_file) Name() string {
+func (f *_escFile) Name() string {
 	return f.name
 }
 
-func (f *_esc_file) Size() int64 {
+func (f *_escFile) Size() int64 {
 	return f.size
 }
 
-func (f *_esc_file) Mode() os.FileMode {
+func (f *_escFile) Mode() os.FileMode {
 	return 0
 }
 
-func (f *_esc_file) ModTime() time.Time {
-	return time.Time{}
+func (f *_escFile) ModTime() time.Time {
+	return time.Unix(f.modtime, 0)
 }
 
-func (f *_esc_file) IsDir() bool {
+func (f *_escFile) IsDir() bool {
 	return f.isDir
 }
 
-func (f *_esc_file) Sys() interface{} {
+func (f *_escFile) Sys() interface{} {
 	return f
 }
 
@@ -121,22 +133,31 @@ func (f *_esc_file) Sys() interface{} {
 // the filesystem's contents are instead used.
 func FS(useLocal bool) http.FileSystem {
 	if useLocal {
-		return _esc_local
+		return _escLocal
 	}
-	return _esc_static
+	return _escStatic
+}
+
+// Dir returns a http.Filesystem for the embedded assets on a given prefix dir.
+// If useLocal is true, the filesystem's contents are instead used.
+func Dir(useLocal bool, name string) http.FileSystem {
+	if useLocal {
+		return _escDirectory{fs: _escLocal, name: name}
+	}
+	return _escDirectory{fs: _escStatic, name: name}
 }
 
 // FSByte returns the named file from the embedded assets. If useLocal is
 // true, the filesystem's contents are instead used.
 func FSByte(useLocal bool, name string) ([]byte, error) {
 	if useLocal {
-		f, err := _esc_local.Open(name)
+		f, err := _escLocal.Open(name)
 		if err != nil {
 			return nil, err
 		}
 		return ioutil.ReadAll(f)
 	}
-	f, err := _esc_static.prepare(name)
+	f, err := _escStatic.prepare(name)
 	if err != nil {
 		return nil, err
 	}
@@ -163,51 +184,55 @@ func FSMustString(useLocal bool, name string) string {
 	return string(FSMustByte(useLocal, name))
 }
 
-var _esc_data = map[string]*_esc_file{
-
-	"/config/.DS_Store": {
-		local: "config/.DS_Store",
-		size:  6148,
-		compressed: "" +
-			"\x1f\x8b\b\x00\x00\tn\x88\x00\xff\xec\x97\xcdJ\xc3@\x14\x85ύ\x11\xa6\x16$K\x97\xb3t%\xf8\x06\xa1T\xc1\xb5{\u007fZ\xa3(\xd1,Tp\x99\a\xf4\x01|\x00\xdfC\xefd\x8e\x92N\xe3\xc2UK{\xbf2|m:g~H\xc8\xcc\x00\x90\xc9\xeb\xcd1P\xe8W\x87\xe8l\x84A\x1c\xcb\x12\x19\xbd\x1b\xda\xeb\xdax\xc1\x11\xee\xd0" +
-			"\x9c\xd5\xcd|\xb8-c\xcd\b\xf7\xce\xe1\x1a\xcf\xfa\xa9\xfa\xf7oV73\xc4\a\xe3T\xcb\xe1WG\x97\x19a\x8e\x06O\xb8Ž\xd6\x1eHd\x17Ib\x9c$\x1e\xb47\xfd\x9d\xa4>\x93\xd4\xfeB\xeaRGWinp\x8c\xf2\x91d\xf7\xba\xf9T\xa8\xb5\x85\xd0\xe3\x1b\x1eQ'\xf3zל\xebe\f\xc30\xb6\x05\x89r\xe3\xd5\x0e\xc3" +
-			"0\x8c5$\xbc\x1f<]\xd2m\xb4\xf0\xff\x8c\xce{\x99\x82\xf6tI\xb7\xd1\xc2z\x19\x9dӎ.hO\x97t\x1b͗\x96\xf0\xf0!\xecYxB\x91\x82\xf6t\xf9\xcfI\x1bƖ\xb0\x13U\x84\xf5\xff\xe4\xef\xf3\xbfa\x18\x1b\x8c\xe4\xd3\xf3\xe9\x04\xbf\a\x82%\xc2Z\xeb\xb5\\\xfd\x04\xb0\xb8\x11\u0d5cu\xc3R|л\xee\xe9\x92" +
-			"n\xa3m#`\x18\xab\xe2;\x00\x00\xff\xff\xfcץ\xfa\x04\x18\x00\x00",
-	},
+var _escData = map[string]*_escFile{
 
 	"/config/config.go": {
-		local: "config/config.go",
-		size:  742,
-		compressed: "" +
-			"\x1f\x8b\b\x00\x00\tn\x88\x00\xffdR\xcdj\xdb@\x10>k\x9fb\xaaC\x91 HwC\x0e\xa5%\xa1PZC\x1f Y\xed\x8e\xe4u\xa5\x1d\xb1\x1a\x11B\xf0\xbbwf\xe5\xe0\x88\x9c,\xbe\xfd~f\xbeq\xdb\xc2Ѻ\u007fv@p\x14\xfb0\x80'\\\xae\xdfk\xb2\x1c(\xc2d\xa3\x10&\x8cl\xe6\x1d٘0͔\x18*S" +
-			"\x94\x18\x1d\xf9\x10\x87\xf6\xbcP,\x05\xe8'֟\x88ܞ\x98\xe7\xd2\xd4\xc6H\xde\xe3H\x9d\x1d\xbfoia\x01>!t!\xaa\x14\xa8;\xa3c\xa0\xfe}\x1a\xf5\x82>\x8ch\xf8uƽv\xe1\xb4\n\xf9\xcd\x14\xc7D\xaa\xfb\xe9\x15S\x9fg\xd5\x1d\xcayß\x82/\x9f\xcd%\xa7\xff\"\xeb\x1f\xddH\xab\xbf\xba\x8c\x02\xbc/\xdc\xe4" +
-			"8\xa6]\x8e\xe9\xd7\xe8>\xe9*\x1d\nt\xaf\xe6A\xbe\xea\xfdh2\x93G\xa9\x03\x13\x1c\xee\xf3\x12\xcdo|\xf9\xb1AYZ\x9bb_\xb2\xf0>Z\xbc]L\x81)˯N\xcd&\xaf\xbe\xeet\xe2\x13zP\xe6\x97{\x88a\xd4\xe8B\x9ao\x8eR\x04\x8f\xb1*\xe5\x8dҡ\xbcS\x92\xb0\xa5\x86\"!\xaf)\xee\xaf\xfc\xa1\x9fo\xcb" +
-			"\x82\xac\xa7yIv\x9ee\am \x0f)\xd5$\xb4>_\x04\xfaD\x13\xd8\xccu\x822z\xe8^\xd5C[9\xb4\xed@\x9e\\Cih\x87\xc0\xa7\xb5k\x1cM\xedt\x0e\x9d\xd4\xd1\xe2\xe2n\xc5\xe6\xc0j\xb6|\xba\x1e\xb0\xbe5\xab\vm!R\xc5\xc3ߪ\xb7\xe3\xa2\xed\xe9\bw\xf0\xa4h~n\xfe\xcc\x18\xb3G}\xdb0\xffs" +
-			".\xe6\u007f\x00\x00\x00\xff\xff\x1b\xdc\xea\xfe\xe6\x02\x00\x00",
+		local:   "config/config.go",
+		size:    742,
+		modtime: 1457324388,
+		compressed: `
+H4sIAAAJbogA/2RSzWrbQBA+a59iqkORIEh3Qw6lJaFQWkMfIFntjuR1pR2xGhFC8Lt3ZuXgiJwsvv1+
+Zr5x28LRun92QHAU+zCAJ1yu32uyHCjCZKMQJoxs5h3ZmDDNlBgqU5QYHfkQh/a8UCwF6CfWn4jcnpjn
+0tTGSN7jSJ0dv29pYQE+IXQhqhSoO6NjoP59GvWCPoxo+HXGvXbhtAr5zRTHRKr76RVTn2fVHcp5w5+C
+L5/NJaf/Iusf3Uirv7qMArwv3OQ4pl2O6dfoPukqHQp0r+ZBvur9aDKTR6kDExzu8xLNb3z5sUFZWpti
+X7LwPlq8XUyBKcuvTs0mr77udOITelDml3uIYdToQppvjlIEj7Eq5Y3SobxTkrClhiIhrynur/yhn2/L
+gqyneUl2nmUHbSAPKdUktD5fBPpEE9jMdYIyeuhe1UNbObTtQJ5cQ2loh8CntWscTe10Dp3U0eLibsXm
+wGq2fLoesL41qwttIVLFw9+qt+Oi7ekId/CkaH5u/swYs0d92zD/cy7mfwAAAP//G9zq/uYCAAA=
+`,
 	},
 
 	"/config/config.json": {
-		local: "config/config.json",
-		size:  36,
-		compressed: "" +
-			"\x1f\x8b\b\x00\x00\tn\x88\x00\xff\xaa\xe6\xe2T*(\xca\xcfJM.\x89\xcfLQ\xb2RPJ\xcf/OM\xd2-NNLK\xcb\xcfIQ\xe2\xaa\xe5\x02\x04\x00\x00\xff\xff[\xab]C$\x00\x00\x00",
+		local:   "config/config.json",
+		size:    36,
+		modtime: 1457596613,
+		compressed: `
+H4sIAAAJbogA/6rm4lQqKMrPSk0uic9MUbJSUErPL09N0i1OTkxLy89JUeKq5QIEAAD//1urXUMkAAAA
+`,
 	},
 
 	"/config/config_test.go": {
-		local: "config/config_test.go",
-		size:  237,
-		compressed: "" +
-			"\x1f\x8b\b\x00\x00\tn\x88\x00\xffd\x8f\xbfJ\x041\x10\x87띧\x18Rm\xe4Lz\xc1BDD\xb0\xb0\xb8\x17\xc8M\xfe\\ν̙L\x10\x11\xdf\xddx\xbb\x9d\xd5\xc0\xc7\xc7\xefc.\x8e\xde]\nH\\bN\x00\xf9|\xe1*8äR\x96c?\x18\xe2\xb3mR\x83бZ\tMr\xfc\xb2\xae\xb5PE\r\xebJJ" +
-			"R\xa0\x01b/\x84\xfb\x01^\xd9\xf9gZ\xb8\xfb\xc7\xeb\xee,x\xb3\x89f\xaf\xf1\x1b\xa6\xb5\x87w\xf7\xf8\xcf\xfd\x03\x0fc_feWm;\xe6Ը(=B\xd3\xda7O\x1f\xdd-\xb3\xecP%\xfe\f\x87\xdbF.F^\xbc\xdam\x0f\x99\xb7ʧ@\xf2\xe25\xfc\xc0o\x00\x00\x00\xff\xff&\xcd>z\xed\x00\x00\x00",
+		local:   "config/config_test.go",
+		size:    237,
+		modtime: 1457596613,
+		compressed: `
+H4sIAAAJbogA/2SPv0oEMRCH652nGFJt5Ex6wUJERLCwuBfITf5czr3MmUwQEd/deLud1cDHx+9jLo7e
+XQpIXGJOAPl84So4w6RSlmM/GOKzbVKD0LFaCU1y/LKutVBFDetKSlKgAWIvhPsBXtn5Z1q4+8fr7ix4
+s4lmr/EbprWHd/f4z/0DD2NfZmVXbTvm1LgoPULT2jdPH90ts+xQJf4Mh9tGLkZevNptD5m3yqdA8uI1
+/MBvAAAA//8mzT567QAAAA==
+`,
 	},
 
 	"/config/seelog.xml": {
-		local: "config/seelog.xml",
-		size:  364,
-		compressed: "" +
-			"\x1f\x8b\b\x00\x00\tn\x88\x00\xff\\\x90\xb1j\xc30\x10\x86\xe7\xe4)\x8e\x03A\x02\xb5%\x9b\xbaC\xb0<\x95L\xedԱtP\xec\xb3k\x90%#\xc9i\xf3\xf6\x95b\xd3B7ݯ\x9f\xfb>\xae\xf6D\xda\x0e\x10n3I\xf47\xd3\"L\xa3\xd1t%-\xb1\xa3\xcb2\xc4@}o\x019g\x1d6\xfb]m\x970/\xc1Co" +
-			"ݤ\xc2\xd8I\x9c\xd4h\xd2\u05een\xad\xf1V\x13o\xf6irV\xeb\xd1\f\xfd\xa8\xe9\u007f{\xc3v*\x10B*\x185ř_\x95\xe3ъ\x0f\xf6\x8b.\x99oU\xdf[\xdd\xe51BH\xe5Y\x85@\xceH\x14e.\x8a\xbc\x14\xe2\t!i&\x96\x97X!\xdc\xe15\xdf4\x93\xf1\xca\xf6w\xc3\xf5\r\u007f\"k \x91=\xc7\xf5" +
-			"\x87\xb40\x13E&J(\xaa\x93x<\x89*\x17B\x1c\u177d\xa4C|\x00{\xf5\x03\x1c\xd89:?\x00;/\xa6}\xfb\xb4.\x1c\x99A\x9e`\xfc\x97V\xf3\xf5\xc4\xcd\xfe'\x00\x00\xff\xff\xdb~\x06Dl\x01\x00\x00",
+		local:   "config/seelog.xml",
+		size:    364,
+		modtime: 1457596613,
+		compressed: `
+H4sIAAAJbogA/1yQsWrDMBCG5+QpjgNBArUlm7pDsDyVTO3UsXRQ7LNrkCUjyWnz9pVi00I33a+f+z6u
+9kTaDhBuM0n0N9MiTKPRdCUtsaPLMsRAfW8BOWcdNvtdbZcwL8FDb92kwthJnNRo0teubq3xVhNv9mly
+VuvRDP2o6X97w3YqEEIqGDXFmV+V49GKD/aLLplvVd9b3eUxQkjlWYVAzkgUZS6KvBTiCSFpJpaXWCHc
+4TXfNJPxyvZ3w/UNfyJrIJE9x/WHtDATRSZKKKqTeDyJKhdCHOGdvaRDfAB79QMc2Dk6PwA7L6Z9+7Qu
+HJlBnmD8l1bz9cTN/icAAP//234GRGwBAAA=
+`,
 	},
 
 	"/": {
