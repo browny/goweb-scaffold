@@ -14,8 +14,6 @@ save-deps: ## Save deps (Godeps)
 	godep save goweb-scaffold
 
 restore-deps: ## Restore deps from snapshot (Godeps)
-	rm -rf Godeps/
-	rm -rf vendor/
 	godep restore goweb-scaffold
 
 install: ## Install the app
