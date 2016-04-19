@@ -7,7 +7,7 @@ go:
 install:
   - go get github.com/tools/godep
   - make restore-deps
-  - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/$HOME/gopath/src/
+  - rsync -az $HOME/gopath/src/github.com/browny/goweb-scaffold $HOME/gopath/src/
 
 script:
   make test
