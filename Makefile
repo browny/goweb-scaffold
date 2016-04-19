@@ -16,6 +16,7 @@ save-deps: ## Save deps (Godeps)
 restore-deps: ## Restore deps from snapshot (Godeps)
 	godep restore goweb-scaffold
 	go get github.com/mjibson/esc
+	go get github.com/stretchr/testify
 
 install: ## Install the app
 	go install goweb-scaffold
