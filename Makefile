@@ -6,12 +6,17 @@ asset: ## Build asset
 	esc -o config/asset.go -pkg config -ignore=".go" -ignore="DS_Store" config/
 
 build: ## Compile all packages
-	go build ./...
+	go build $(shell go list ./... | grep -v /vendor/)
 
-snapshot-deps: ## Snapshot dependencies (Godeps)
+save-deps: ## Save deps (Godeps)
 	rm -rf Godeps/
 	rm -rf vendor/
 	godep save goweb-scaffold
+
+restore-deps: ## Restore deps from snapshot (Godeps)
+	rm -rf Godeps/
+	rm -rf vendor/
+	godep restore goweb-scaffold
 
 install: ## Install the app
 	go install goweb-scaffold
