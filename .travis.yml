@@ -8,7 +8,4 @@ install:
   make deps
 
 script:
-  sh scripts/build-asset.sh
-  go build ./...
-  go test ./...
 

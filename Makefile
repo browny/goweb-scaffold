@@ -29,7 +29,7 @@ deps: ## Install required dependencies
 run: ## Run goweb service as container
 	bash scripts/docker-run.sh
 
-test: ## Run all tests
+test: asset build ## Run all tests
 	bash scripts/test.sh
 
 help:
