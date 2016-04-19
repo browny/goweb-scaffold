@@ -4,11 +4,10 @@ go:
   - 1.5
   - 1.6
 
-go_import_path: $HOME/gopath/src/github.com/browny
-
 install:
   - go get github.com/tools/godep
   - make restore-deps
+  - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/$HOME/gopath/src/
 
 script:
   make test
