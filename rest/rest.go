@@ -33,7 +33,7 @@ type RestHandler struct {
 
 // HealthCheck is called by Google cloud to do health check
 func (rest *RestHandler) HealthCheck(w http.ResponseWriter, req *http.Request) *restError {
-	fmt.Fprintf(w, "OK")
+	fmt.Fprintf(w, "OK World")
 	return nil
 }
 

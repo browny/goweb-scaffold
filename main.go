@@ -22,7 +22,9 @@ var globalConfig config.GlobalConfig
 
 func main() {
 	// flag parsing
+	var env string
 	var port string
+	flag.StringVar(&env, "env", "Alpha", "environment")
 	flag.StringVar(&port, "port", "8000", "port")
 	flag.Parse()
 
@@ -34,9 +36,10 @@ func main() {
 	// config loading
 	globalConfig = config.LoadGcloudConfig(
 		config.LoadAsset("/config/config.json"))
-	log.Debugf("config: %+v", globalConfig)
 
 	buildDependencyGraph()
+
+	log.Debugf("App starts: env[%s], projectID[%s]", env, globalConfig.ProjectId)
 
 	// run cron job
 	taskRunner.GlobalRun()

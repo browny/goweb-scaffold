@@ -13,23 +13,13 @@ save-deps: ## Save deps (Godeps)
 	rm -rf vendor/
 	godep save goweb-scaffold
 
-restore-deps: ## Restore deps from snapshot (Godeps)
+restore-deps: ## Restore deps (Godeps)
 	godep restore goweb-scaffold
 	go get github.com/mjibson/esc
 	go get github.com/stretchr/testify
 
 install: ## Install the app
 	go install goweb-scaffold
-
-deps: ## Install required dependencies
-	go get github.com/cihub/seelog
-	go get github.com/codegangsta/negroni
-	go get github.com/facebookgo/inject
-	go get github.com/gorilla/mux
-	go get github.com/mjibson/esc
-	go get github.com/robfig/cron
-	go get github.com/stretchr/testify
-	go get github.com/tools/godep
 
 run: ## Run goweb service as container
 	bash scripts/docker-run.sh

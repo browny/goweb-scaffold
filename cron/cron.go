@@ -18,7 +18,7 @@ type TaskRunner struct {
 
 // GlobalRun runs cluster-wise background task, only one node is allowed to run this
 func (tr *TaskRunner) GlobalRun() {
-	log.Debugf("Run global taskRunner: projectId[%s]", tr.Config.ProjectId)
+	log.Debugf("Run global taskRunner: projectID[%s]", tr.Config.ProjectId)
 
 	GlobalCron = cron.New()
 
