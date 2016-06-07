@@ -1,4 +1,4 @@
-.PHONY: asset build snapshot-deps install deps run test
+.PHONY: asset build snapshot-deps install deps run test cover
 .DEFAULT_GOAL := help
 
 asset: ## Build asset
@@ -26,6 +26,9 @@ run: ## Run goweb service as container
 
 test: asset build ## Run all tests
 	go test -v $(shell go list ./... | grep -v vendor | grep /)
+
+cover: asset build
+	sh scripts/coverage
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

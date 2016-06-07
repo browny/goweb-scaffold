@@ -13,5 +13,5 @@ install:
   - rsync -az $HOME/gopath/src/github.com/browny/goweb-scaffold $HOME/gopath/src/
 
 script:
-  - $HOME/gopath/bin/goveralls -service=travis-ci
-
+  - PATH="$HOME/gopath/bin:$PATH"
+  - scripts/coverage --coveralls
