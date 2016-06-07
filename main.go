@@ -3,22 +3,21 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 
 	"goweb-scaffold/config"
 	"goweb-scaffold/cron"
+	"goweb-scaffold/logger"
 	"goweb-scaffold/rest"
 
-	log "github.com/cihub/seelog"
 	"github.com/codegangsta/negroni"
 	"github.com/facebookgo/inject"
 )
 
+var appContext config.AppContext
 var taskRunner cron.TaskRunner
 var restHandler rest.RestHandler
-var globalConfig config.GlobalConfig
 
 func main() {
 	// flag parsing
@@ -28,18 +27,9 @@ func main() {
 	flag.StringVar(&port, "port", "8000", "port")
 	flag.Parse()
 
-	// set logger
-	seelogConf, _ := ioutil.ReadAll(config.LoadAsset("/config/seelog.xml"))
-	logger, _ := log.LoggerFromConfigAsBytes(seelogConf)
-	log.ReplaceLogger(logger)
+	buildDependencyGraph(env)
 
-	// config loading
-	globalConfig = config.LoadGcloudConfig(
-		config.LoadAsset("/config/config.json"))
-
-	buildDependencyGraph()
-
-	log.Debugf("App starts: env[%s], projectID[%s]", env, globalConfig.ProjectId)
+	logger.Debugf("App starts: env[%s], projectID[%s]", appContext.Env, appContext.ProjectID)
 
 	// run cron job
 	taskRunner.GlobalRun()
@@ -53,11 +43,15 @@ func main() {
 	n.Run(fmt.Sprintf(":%s", port))
 }
 
-// buildDependencyGraph builds dependency graph
-func buildDependencyGraph() {
+// buildDependencyGraph prepares all the app needs
+func buildDependencyGraph(env string) {
+	logger.SetupLogger()
+	config.Viper()
+	appContext.Load(env)
+
 	var g inject.Graph
 	err := g.Provide(
-		&inject.Object{Value: &globalConfig},
+		&inject.Object{Value: &appContext},
 		&inject.Object{Value: &taskRunner},
 		&inject.Object{Value: &restHandler},
 	)
@@ -67,7 +61,6 @@ func buildDependencyGraph() {
 	if err := g.Populate(); err != nil {
 		os.Exit(1)
 	}
-	// :~)
 }
 
 // cors middleware (cross-origin resource sharing)

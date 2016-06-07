@@ -1,0 +1,31 @@
+---
+Local:
+  project_id: apple
+  datastore:
+    kind_suffix: Local
+  etcd: 
+    - "http://104.199.174.116:2379"
+    - "http://104.199.163.147:2379"
+    - "http://104.155.215.159:2379"
+Alpha:
+  project_id: ball
+  datastore:
+    kind_suffix: Alpha
+  etcd:
+    - "http://etcd-a:2379"
+    - "http://etcd-b:2379"
+    - "http://etcd-c:2379"
+Prd:
+  project_id: cat
+  datastore:
+    kind_suffix: ""
+  etcd:
+    - "http://etcd-a:2379"
+    - "http://etcd-b:2379"
+    - "http://etcd-c:2379"
+common:
+  white_list:
+    - "220.128.223.100" 
+    - "210.244.6.30"   
+    - "211.21.108.229"
+

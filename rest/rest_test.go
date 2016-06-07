@@ -2,18 +2,24 @@ package rest_test
 
 import (
 	"bytes"
+	"flag"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
-	log "github.com/cihub/seelog"
+	"goweb-scaffold/config"
+	"goweb-scaffold/logger"
+
 	"github.com/codegangsta/negroni"
+	"github.com/facebookgo/inject"
 	"github.com/stretchr/testify/suite"
 	"goweb-scaffold/rest"
 )
 
 var n *negroni.Negroni
+var appContext config.AppContext
 var testedRestHandler rest.RestHandler
 
 func TestRestHandlerTestSuite(t *testing.T) {
@@ -25,11 +31,20 @@ type RestHandlerTestSuite struct {
 }
 
 func (suite *RestHandlerTestSuite) SetupSuite() {
+	// flag parsing
+	var env string
+	flag.StringVar(&env, "env", "Alpha", "environment")
+	flag.Parse()
+
+	buildDependencyGraph(env)
+	logger.SetupLogger()
+
+	// run test http server
 	n = negroni.New()
 	router := rest.BuildRouter(testedRestHandler)
 	n.UseHandler(router)
 
-	log.Debug("======== RestHandler Test Begin ========")
+	logger.Debug("======== RestHandler Test Begin ========")
 }
 
 func (suite *RestHandlerTestSuite) TestHealthCheck() {
@@ -46,11 +61,29 @@ func (suite *RestHandlerTestSuite) TestHealthCheck() {
 
 	if body, err := ioutil.ReadAll(response.Body); err != nil {
 		t.Error(err)
-	} else if string(body) != "OK" {
-		t.Error("expected", "OK", "got", body)
+	} else if string(body) != "ball is OK" {
+		t.Error("expected", "ball is OK", "got", string(body))
 	}
 }
 
+func buildDependencyGraph(env string) {
+	config.Viper()
+	appContext.Load(env)
+
+	var g inject.Graph
+	err := g.Provide(
+		&inject.Object{Value: &appContext},
+		&inject.Object{Value: &testedRestHandler},
+	)
+	if err != nil {
+		os.Exit(1)
+	}
+	if err := g.Populate(); err != nil {
+		os.Exit(1)
+	}
+	// :~)
+}
+
 func (suite *RestHandlerTestSuite) TearDownSuite() {
-	log.Debugf("======== RestHandler Test End ========")
+	logger.Debugf("======== RestHandler Test End ========")
 }

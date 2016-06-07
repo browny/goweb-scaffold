@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	log "github.com/cihub/seelog"
+	"goweb-scaffold/config"
+	"goweb-scaffold/logger"
+
 	"github.com/gorilla/mux"
 )
 
@@ -15,13 +17,13 @@ type restError struct {
 	Code   int
 }
 
-// RestHandlerWrapper manages all http error handling
-type RestHandlerWrapper func(http.ResponseWriter, *http.Request) *restError
+// handlerWrapper manages all http error handling
+type handlerWrapper func(http.ResponseWriter, *http.Request) *restError
 
-func (fn RestHandlerWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (fn handlerWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if restErr := fn(w, r); restErr != nil {
 		if restErr.Detail != "" {
-			log.Errorf("error detail: %s", restErr.Detail)
+			logger.Errorf("error detail: %s", restErr.Detail)
 		}
 		http.Error(w, restErr.Error.Error(), restErr.Code)
 	}
@@ -29,11 +31,12 @@ func (fn RestHandlerWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // RestHandler includes all http handler methods
 type RestHandler struct {
+	*config.AppContext `inject:""`
 }
 
 // HealthCheck is called by Google cloud to do health check
 func (rest *RestHandler) HealthCheck(w http.ResponseWriter, req *http.Request) *restError {
-	fmt.Fprintf(w, "OK")
+	fmt.Fprintf(w, rest.AppContext.ProjectID+" is OK")
 	return nil
 }
 
@@ -41,7 +44,7 @@ func BuildRouter(restHandler RestHandler) *mux.Router {
 	router := mux.NewRouter()
 
 	router.Handle("/healthcheck",
-		RestHandlerWrapper(restHandler.HealthCheck)).Methods("GET")
+		handlerWrapper(restHandler.HealthCheck)).Methods("GET")
 
 	return router
 }

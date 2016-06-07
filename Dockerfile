@@ -1,8 +1,9 @@
-FROM golang:1.6.0
+FROM golang:1.6.2
 
 ADD . /go/src/goweb-scaffold
 WORKDIR /go/src/goweb-scaffold
-RUN make deps
+RUN go get github.com/tools/godep
+RUN make restore-deps
 RUN go install goweb-scaffold
 
 ENTRYPOINT ["/go/bin/goweb-scaffold"]

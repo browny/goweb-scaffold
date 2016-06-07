@@ -188,37 +188,32 @@ var _escData = map[string]*_escFile{
 
 	"/config/config.go": {
 		local:   "config/config.go",
-		size:    742,
-		modtime: 1457324388,
+		size:    1737,
+		modtime: 1465291897,
 		compressed: `
-H4sIAAAJbogA/2RSzWrbQBA+a59iqkORIEh3Qw6lJaFQWkMfIFntjuR1pR2xGhFC8Lt3ZuXgiJwsvv1+
-Zr5x28LRun92QHAU+zCAJ1yu32uyHCjCZKMQJoxs5h3ZmDDNlBgqU5QYHfkQh/a8UCwF6CfWn4jcnpjn
-0tTGSN7jSJ0dv29pYQE+IXQhqhSoO6NjoP59GvWCPoxo+HXGvXbhtAr5zRTHRKr76RVTn2fVHcp5w5+C
-L5/NJaf/Iusf3Uirv7qMArwv3OQ4pl2O6dfoPukqHQp0r+ZBvur9aDKTR6kDExzu8xLNb3z5sUFZWpti
-X7LwPlq8XUyBKcuvTs0mr77udOITelDml3uIYdToQppvjlIEj7Eq5Y3SobxTkrClhiIhrynur/yhn2/L
-gqyneUl2nmUHbSAPKdUktD5fBPpEE9jMdYIyeuhe1UNbObTtQJ5cQ2loh8CntWscTe10Dp3U0eLibsXm
-wGq2fLoesL41qwttIVLFw9+qt+Oi7ekId/CkaH5u/swYs0d92zD/cy7mfwAAAP//G9zq/uYCAAA=
-`,
-	},
-
-	"/config/config.json": {
-		local:   "config/config.json",
-		size:    36,
-		modtime: 1457596613,
-		compressed: `
-H4sIAAAJbogA/6rm4lQqKMrPSk0uic9MUbJSUErPL09N0i1OTkxLy89JUeKq5QIEAAD//1urXUMkAAAA
+H4sIAAAJbogA/8xUTW/bOBA9i7+CS2ABKpuVsNhbgBzSNGmDFolRF720RUBTQ4eJRAok5cQo+t87JCVb
+bpv2Wh9MkfP15r0h65ouhHwQa6DSGqXXtLHgx+/BiaCtoZ0w6NCBCaQ/cCZEd711gXJSsNU2gGf4oboQ
+F21rbYeg27hp7TouBkJ9F0LPCG7WOtwNq0rarva9+u//eqN7cIyUhCCst1Y0Z95DoNrTRyd6tFE1GJkg
+BUsdiIYq3QJVznZUJF+JpwEautrGHLHUSV2vbWNlZd26npXs7vXKW1ODlySm3RfkvQh31AenzbpMOarL
+WOYLKXKRk1N6ueRKtB5KUkQIx/Q2niZzddODSTmwkcJBGJxJOMnX1NhZ359bE+ApjMR6is21WmayZbaR
+sO1h7ot4BhkiiAuzobtfhkmKhbP3IMPVy/nhclBKP92oN9o0u8OLIJsluA04T+nHz9Pxue06a87zEBwl
+KaoP8X+EHemhLf5N05FpH7+3omtzk4lLLsMTPdqjL1M4B0Q+8YqN4FBUC9yF1nCW8iMREwEssjfVTYE9
+SK20nGavwMMRLlKfAS+HVSyCqiCAKhJ1GmPzdk9ROsyx1SsIywSJsz473OqGjRkOCHwmqhFB+GAdVA/o
+detTyJRgTvZP45coPHAG6HfQsUxy7HqNuQ4UmnfMsjPGZ6mSbOl+eKpNdpyEWm2pl8JgZRpH1Ge9UgRP
+okwA5lGkGItByOWvRYeg830tJ+tZ02TrAhNzVj1vqXPa5x1+64F3uvZO4vIIq3+xI6Vs28yiwLn9WLxD
+Kq5G5jgataLR/tcpNbqNTRc9UiI5vlzVhXPWKc4uUdY2utkdd3G+T+jfnn4y7DiaSsyFlO8HWY2koNc/
+G/QZsbctMheQc8/LA5FeC9f8Qqg88dDMbtYuLKv1nS7v8dHgLF7GyEFcx5cpv8SJCETD928dGznLj2+1
+jZFxDn/gb2QvvfLVNTy+wDnHmYk1yj+A0m8BAAD///HSTzrJBgAA
 `,
 	},
 
 	"/config/config_test.go": {
 		local:   "config/config_test.go",
-		size:    237,
-		modtime: 1457596613,
+		size:    132,
+		modtime: 1465287110,
 		compressed: `
-H4sIAAAJbogA/2SPv0oEMRCH652nGFJt5Ex6wUJERLCwuBfITf5czr3MmUwQEd/deLud1cDHx+9jLo7e
-XQpIXGJOAPl84So4w6RSlmM/GOKzbVKD0LFaCU1y/LKutVBFDetKSlKgAWIvhPsBXtn5Z1q4+8fr7ix4
-s4lmr/EbprWHd/f4z/0DD2NfZmVXbTvm1LgoPULT2jdPH90ts+xQJf4Mh9tGLkZevNptD5m3yqdA8uI1
-/MBvAAAA//8mzT567QAAAA==
+H4sIAAAJbogA/ypITM5OTE9VSM7PS8tM5+LKzC3ILypR0ODiVCpJLS7JzEtX4tLk4korzUtWCAEKhGUW
+pBZplChoQWX1QjQVqrk4IcKaXLXoSj0Si1JwKAdLgbQAAgAA//+dCaWbhAAAAA==
 `,
 	},
 
@@ -232,6 +227,18 @@ H4sIAAAJbogA/1yQsWrDMBCG5+QpjgNBArUlm7pDsDyVTO3UsXRQ7LNrkCUjyWnz9pVi00I33a+f+z6u
 VuvRDP2o6X97w3YqEEIqGDXFmV+V49GKD/aLLplvVd9b3eUxQkjlWYVAzkgUZS6KvBTiCSFpJpaXWCHc
 4TXfNJPxyvZ3w/UNfyJrIJE9x/WHtDATRSZKKKqTeDyJKhdCHOGdvaRDfAB79QMc2Dk6PwA7L6Z9+7Qu
 HJlBnmD8l1bz9cTN/icAAP//234GRGwBAAA=
+`,
+	},
+
+	"/config/viper.yml": {
+		local:   "config/viper.yml",
+		size:    575,
+		modtime: 1465280095,
+		compressed: `
+H4sIAAAJbogA/7SRzU7EIBDH730Kwh0Wpl+Wm3cPvkHDUjZF2YW0Y/TxnTbrxjQ2PXki+X/M/MIIIYqX
+5Gw0BWN5Sm/eYR8Gw2zO0ZM2WLQzpskvAcbew23o54/LJXwZthZJ9uiosfqC8RExm9NJq0rqrpO6pVc3
+Bsq243uZppS6avczdS1B1/R298xzzKPdMp9tjAfIa+8HebNp0YT9E2K1zvuWu1uv07CFchYPmDj/PyCX
+rtd0WwZ/jgF9H8OMjzUASmp4kgD0/UrxxwlBKwlVJRtZksp+6ZruQNmlQ9OL7wAAAP//+gz4sj8CAAA=
 `,
 	},
 

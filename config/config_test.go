@@ -1,12 +1,13 @@
 package config
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestLoadGcloudConfig(t *testing.T) {
-	config := LoadGcloudConfig(LoadAsset("/config/config.json"))
+func TestViper(t *testing.T) {
+	Viper()
+}
 
-	assert.Equal(t, "goweb-scaffold", config.ProjectId)
+func TestViperHard(t *testing.T) {
+	ViperHard()
 }

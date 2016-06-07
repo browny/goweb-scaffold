@@ -9,6 +9,7 @@ goweb-scaffold is a template project for go web application with some convenient
 - Logging with [seelog](github.com/cihub/seelog)
 - HTTP middleware with [negroni](https://github.com/codegangsta/negroni)
 - Testing with [testify](https://github.com/stretchr/testify)
+- Config with [viper](https://github.com/spf13/viper)
 
 ### Local Dev
 
