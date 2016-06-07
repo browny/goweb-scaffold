@@ -4,11 +4,16 @@ go:
   - 1.5
   - 1.6
 
+before_install:
+  - go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
+
 install:
   - go get github.com/tools/godep
   - make restore-deps
   - rsync -az $HOME/gopath/src/github.com/browny/goweb-scaffold $HOME/gopath/src/
 
 script:
-  make test
+  - make test
+  - $HOME/gopath/bin/goveralls -service=travis-ci
 

@@ -1,10 +1,10 @@
 ## goweb-scaffold
 [![GoDoc](https://godoc.org/github.com/browny/goweb-scaffold?status.svg)](http://godoc.org/github.com/browny/goweb-scaffold)
 [![Travis Build Status](https://travis-ci.org/browny/goweb-scaffold.svg?branch=master)](https://travis-ci.org/browny/goweb-scaffold)
+[![Coverage Status](https://coveralls.io/repos/github/browny/goweb-scaffold/badge.svg?branch=master)](https://coveralls.io/github/browny/goweb-scaffold?branch=master)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-
-goweb-scaffold is a template project for go web application with some convenient components as below.
+A template golang web project built with love :cupid:
 
 - Dependency injection with [facebookgo-inject](github.com/facebookgo/inject)
 - Logging with [seelog](github.com/cihub/seelog)
