@@ -1,6 +1,7 @@
 ## goweb-scaffold
 [![GoDoc](https://godoc.org/github.com/browny/goweb-scaffold?status.svg)](http://godoc.org/github.com/browny/goweb-scaffold)
 [![Travis Build Status](https://travis-ci.org/browny/goweb-scaffold.svg?branch=master)](https://travis-ci.org/browny/goweb-scaffold)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 
 goweb-scaffold is a template project for go web application with some convenient components as below.
@@ -14,6 +15,7 @@ goweb-scaffold is a template project for go web application with some convenient
 ### Local Dev
 
 1. Assume your environment with golang installed (For Mac: `brew install go`)
+1. Cloen this repository to your `$GOPATH/src`
 1. Install depedencies
 
   ``` sh
@@ -23,16 +25,13 @@ goweb-scaffold is a template project for go web application with some convenient
 1. Run http server
 
   ``` sh
-  git clone git@github.com:browny/goweb-scaffold.git
-  cd ./goweb-scaffold
   go run main.go
   ```
 
 1. Run test
 
   ``` sh
-  cd ./goweb-scaffold
-  sh script/test.sh
+  make test
   ```
 
 
@@ -85,7 +84,7 @@ goweb-scaffold is a template project for go web application with some convenient
 
   ``` sh
   // test inside container
-  sh scripts/test.sh
+  make test
 
   // run app inside container
   go run main.go

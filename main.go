@@ -17,7 +17,7 @@ import (
 
 var appContext config.AppContext
 var taskRunner cron.TaskRunner
-var restHandler rest.RestHandler
+var restHandler rest.Handler
 
 func main() {
 	// flag parsing
@@ -27,7 +27,7 @@ func main() {
 	flag.StringVar(&port, "port", "8000", "port")
 	flag.Parse()
 
-	buildDependencyGraph(env)
+	buildDependency(env)
 
 	logger.Debugf("App starts: env[%s], projectID[%s]", appContext.Env, appContext.ProjectID)
 
@@ -43,8 +43,8 @@ func main() {
 	n.Run(fmt.Sprintf(":%s", port))
 }
 
-// buildDependencyGraph prepares all the app needs
-func buildDependencyGraph(env string) {
+// buildDependency prepares all the app needs
+func buildDependency(env string) {
 	logger.SetupLogger()
 	config.Viper()
 	appContext.Load(env)
