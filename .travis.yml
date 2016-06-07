@@ -14,4 +14,4 @@ install:
 
 script:
   - PATH="$HOME/gopath/bin:$PATH"
-  - scripts/coverage --coveralls
+  - sh scripts/coverage --coveralls
