@@ -1,8 +1,7 @@
 language: go
 
 go:
-  - 1.5
-  - 1.6
+  - tip
 
 before_install:
   - go get github.com/mattn/goveralls
@@ -14,6 +13,5 @@ install:
   - rsync -az $HOME/gopath/src/github.com/browny/goweb-scaffold $HOME/gopath/src/
 
 script:
-  - make test
   - $HOME/gopath/bin/goveralls -service=travis-ci
 
